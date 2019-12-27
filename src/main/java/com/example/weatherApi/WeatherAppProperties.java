@@ -1,13 +1,14 @@
 package com.example.weatherApi;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
 @ConfigurationProperties("app.weatherr")
-
+@Configuration
 public class WeatherAppProperties {
 
 

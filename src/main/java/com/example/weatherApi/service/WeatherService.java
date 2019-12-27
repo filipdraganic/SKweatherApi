@@ -1,9 +1,13 @@
 package com.example.weatherApi.service;
 
 import com.example.weatherApi.WeatherAppProperties;
+import com.example.weatherApi.dao.WeatherDao;
 import com.example.weatherApi.model.Weather;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
 import java.net.URI;
+import java.util.List;
 
 @Service
 public class WeatherService {
@@ -26,12 +31,15 @@ public class WeatherService {
 
     private final String apiKey;
 
+    private final WeatherDao weatherDao;
 
 
-
-    public WeatherService(RestTemplate restTemplate, WeatherAppProperties properties) {
+    @Autowired
+    public WeatherService(RestTemplate restTemplate , WeatherDao weatherDao) {
         this.restTemplate = restTemplate;
-        this.apiKey = properties.getApi().getKey();
+//        this.apiKey = weatherAppProperties.getApi().getKey();
+        this.apiKey = "87f64d7d5829492bb164f8b0012da8eb";
+        this.weatherDao = weatherDao;
     }
 
     
@@ -40,13 +48,18 @@ public class WeatherService {
     }
 
 
+    public List<Weather> getWeatherHistory(){
 
+        return weatherDao.findAll();
+    }
 
     @Cacheable("weather")
     public Weather getWeather(String country, String city) {
 
         URI url = new UriTemplate(WEATHER_URL).expand(city, country, this.apiKey);
-        return invoke(url, Weather.class);
+        Weather obj = invoke(url, Weather.class);
+        weatherDao.save(obj);
+        return obj;
     }
 
 
